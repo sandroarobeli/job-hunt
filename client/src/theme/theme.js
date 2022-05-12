@@ -17,25 +17,7 @@ const theme = createTheme({
     },
   },
   palette: {
-    background: {
-      paper: "#FFFFFF",
-    },
-    text: {
-      primary: "#173A5E",
-      secondary: "#46505A",
-    },
-    primary: {
-      main: "#005BBB",
-    },
-    secondary: {
-      main: "#FFD500",
-    },
-    action: {
-      main: "#001E3C",
-    },
-    success: {
-      main: "#009688",
-    },
+    mode: "dark",
   },
 });
 
