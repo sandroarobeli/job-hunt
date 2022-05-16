@@ -264,6 +264,7 @@ const App = () => {
         newComments={newComments}
         onNewCommentsChange={handleNewCommentsChange}
         onSubmitNewCompany={handleSubmitNewCompany}
+        totalCount={companies.length}
         isLoading={isLoading}
       />
       {pending ? (

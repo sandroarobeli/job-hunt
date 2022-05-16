@@ -46,6 +46,9 @@ const Header = (props) => {
       <Toolbar>
         <Stack direction="row" spacing={7} sx={styles.stack}>
           <Typography variant="h5" component="h3">
+            Total Count: {props.totalCount}
+          </Typography>
+          <Typography variant="h5" component="h3">
             SEARCH
           </Typography>
           <TextField
