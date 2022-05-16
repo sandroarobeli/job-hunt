@@ -1,69 +1,63 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import theme from "./theme/theme";
 import Header from "./components/Header";
 import CompanyTable from "./components/CompanyTable";
-
-// THIS WILL COME FROM MONGO VIA PROPS
-const none = [];
-const companies = [
-  {
-    id: "1",
-    name: "company one",
-    date: "05-11-2022",
-    status: true,
-    comments: "nice company",
-  },
-  { id: "2", name: "meore", date: "05-12-2022", status: true, comments: "" },
-  {
-    id: "3",
-    name: "Kaks & Seysi",
-    date: "04-20-2022",
-    status: false,
-    comments: "Dedis muteli movtkan",
-  },
-  {
-    id: "4",
-    name: "company Four",
-    date: "03-11-2022",
-    status: true,
-    comments: "lets wait",
-  },
-  {
-    id: "5",
-    name: "Statsman",
-    date: "12-30-2021",
-    status: true,
-    comments: "interviewed twice",
-  },
-  {
-    id: "6",
-    name: "SPACEKATaZ",
-    date: "12-25-2021",
-    status: false,
-    comments: "Fucking millennials",
-  },
-];
+import LoadingSpinner from "./components/LoadingSpinner";
+import ErrorModal from "./components/ErrorModal";
 
 const App = () => {
   // Local State
+  const [pending, setPending] = useState(false);
+  const [companies, setCompanies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
   const [newCompanyTitle, setNewCompanyTitle] = useState("");
   const [newComments, setNewComments] = useState("");
   const [editCompanyDialogOpen, setEditCompanyDialogOpen] = useState(false);
+  const [editedCompanyId, setEditedCompanyId] = useState("");
   const [editedCompanyTitle, setEditedCompanyTitle] = useState("");
   const [editedComments, setEditedComments] = useState("");
   const [rejected, setRejected] = useState(false);
   const [deleteCompanyDialogOpen, setDeleteCompanyDialogOpen] = useState(false);
-  const [deletedCompanyTitle, setDeletedCompanyTitle] = useState("");
+  const [deletedCompany, setDeletedCompany] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const listCompanies = async () => {
+      setPending(true);
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/companies", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          mode: "cors",
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+          // NON CONNECTION ISSUES
+          setErrorMessage(response.statusText);
+          console.log(response.statusText); // test
+        }
+
+        setPending(false);
+        setCompanies(responseData.companies);
+      } catch (error) {
+        // CONNECTION ISSUES
+        setPending(false);
+        setErrorMessage(error.message);
+        console.log(error.message); // test
+      }
+    };
+    listCompanies();
+  }, []);
 
   // Handler Functions
-  // Filters through existing company names
+  // Sets value for filtering through existing company names
   const handleSearchValueChange = (event) => {
     setSearchValue(event.target.value.toLowerCase());
   };
@@ -89,29 +83,60 @@ const App = () => {
     setNewComments(event.target.value);
   };
 
-  const handleSubmitNewCompany = () => {
+  const handleSubmitNewCompany = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+        body: JSON.stringify({
+          name: newCompanyTitle,
+          comments: newComments,
+        }),
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        // NON CONNECTION ISSUES
+        setErrorMessage(response.statusText);
+        console.log(response.statusText); // test
+      }
+
       setAddCompanyDialogOpen(false);
-      console.log("TITLE: ", newCompanyTitle); // test
-      console.log("COMMENTS: ", newComments); // test
+      setIsLoading(false);
+
+      // Update the state by creating a copy of existing state, pushing the new
+      // Company and setting the result as a new state. Updating the state
+      // Triggers re rendering of UI
+      let arrayCopy = companies.slice();
+      arrayCopy.unshift(responseData.company);
+      setCompanies(arrayCopy);
+
       setNewCompanyTitle("");
       setNewComments("");
-    }, 2000);
+    } catch (error) {
+      // CONNECTION ISSUES
+      setAddCompanyDialogOpen(false);
+      setIsLoading(false);
+      setErrorMessage(error.message);
+      console.log(error.message); // test
+    }
   };
 
   // EDITING EXISTING COMPANY
   // Opens edit existing company modal
   const handleEditCompanyModalOpen = (id) => {
     setEditCompanyDialogOpen(true);
-    console.log(id); // test
     // finds a row by its ID and populates fields
-    let currentCompany = companies.find((company) => company.id === id);
+    let currentCompany = companies.find((company) => company._id === id);
     setEditedCompanyTitle(currentCompany.name);
     setEditedComments(currentCompany.comments);
     setRejected(currentCompany.status);
+    setEditedCompanyId(currentCompany._id);
   };
+
   // Closes edit existing company modal
   const handleEditCompanyModalClose = () => {
     setEditCompanyDialogOpen(false);
@@ -125,33 +150,59 @@ const App = () => {
     setEditedComments(event.target.value);
   };
 
-  const handleStatusChange = (event) => {
+  const handleStatusChange = () => {
     setRejected((prevState) => !prevState);
-    console.log(rejected); // test
   };
 
-  const handleSubmitEditedCompany = () => {
+  const handleSubmitEditedCompany = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+        body: JSON.stringify({
+          id: editedCompanyId,
+          name: editedCompanyTitle,
+          status: rejected,
+          comments: editedComments,
+        }),
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        // NON CONNECTION ISSUES
+        setErrorMessage(response.statusText);
+        console.log(response.statusText); // test
+      }
+
       setEditCompanyDialogOpen(false);
-      console.log("EDITED TITLE: ", editedCompanyTitle); // test
-      console.log("EDITED COMMENTS: ", editedComments); // test
-      console.log("REJECTED: ", rejected); // test
-      setEditedCompanyTitle("");
-      setEditedComments("");
-      //setRejected(false);
-    }, 2000);
+      setIsLoading(false);
+
+      // Force re render UI to display updated company
+      const arrayCopy = companies.slice();
+      const oldIndex = arrayCopy.findIndex(
+        (company) => company._id === editedCompanyId
+      );
+      arrayCopy.splice(oldIndex, 1, responseData.company);
+      setCompanies(arrayCopy);
+    } catch (error) {
+      // CONNECTION ISSUES
+      setEditCompanyDialogOpen(false);
+      setIsLoading(false);
+      setErrorMessage(error.message);
+      console.log(error.message); // test
+    }
   };
 
   // DELETING EXISTING COMPANY
   // Opens delete existing company modal. Note: id here is needed to display company name
   const handleDeleteCompanyModalOpen = (id) => {
     setDeleteCompanyDialogOpen(true);
-    console.log(id); // test
-    // finds a row by its ID and populates fields... TEST START
-    let currentCompany = companies.find((company) => company.id === id);
-    setDeletedCompanyTitle(currentCompany.name);
+    // finds a row by its ID and populates fields
+    let currentCompany = companies.find((company) => company._id === id);
+    setDeletedCompany(currentCompany);
   };
 
   // Closes delete existing company modal
@@ -159,18 +210,46 @@ const App = () => {
     setDeleteCompanyDialogOpen(false);
   };
 
-  const handleCompanyDelete = () => {
+  const handleCompanyDelete = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+        body: JSON.stringify({
+          id: deletedCompany._id,
+        }),
+      });
+      const responseData = await response.json();
+      if (!response.ok) {
+        // NON CONNECTION ISSUES
+        setErrorMessage(response.statusText);
+        console.log(response.statusText); // test
+      }
+
       setDeleteCompanyDialogOpen(false);
-      console.log("DELETED COMPANY: ", deletedCompanyTitle); // test
-      setDeletedCompanyTitle("");
-    }, 2000);
+      setIsLoading(false);
+      setDeletedCompany({});
+
+      // Update the state by creating a copy of existing state, filtering
+      // out the company that was deleted and setting the result as a new state
+      // Updating the state triggers re rendering of UI
+      let arrayCopy = companies.slice();
+      setCompanies(
+        arrayCopy.filter((company) => company._id !== responseData.company._id)
+      );
+    } catch (error) {
+      // CONNECTION ISSUES
+      setDeleteCompanyDialogOpen(false);
+      setIsLoading(false);
+      setErrorMessage(error.message);
+      console.log(error.message); // test
+    }
   };
 
-  // Ids will be attached via req.params...
-  // ORDER OF APPEARANCE WILL BE SET (AT EAST TRIED) VIA MONGO TIMESTAMP... 1 VS. -1 etc
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -187,25 +266,35 @@ const App = () => {
         onSubmitNewCompany={handleSubmitNewCompany}
         isLoading={isLoading}
       />
-      <CompanyTable
-        rows={companies}
-        nameFilter={searchValue}
-        open={editCompanyDialogOpen}
-        onEditCompanyModalOpen={handleEditCompanyModalOpen}
-        onEditCompanyModalClose={handleEditCompanyModalClose}
-        editedCompanyTitle={editedCompanyTitle}
-        onEditedCompanyTitleChange={handleEditedCompanyTitleChange}
-        editedComments={editedComments}
-        onEditedCommentsChange={handleEditedCommentsChange}
-        checked={!rejected}
-        onStatusChange={handleStatusChange}
-        onSubmitEditedCompany={handleSubmitEditedCompany}
-        deleteModalOpen={deleteCompanyDialogOpen}
-        onDeleteCompanyModalOpen={handleDeleteCompanyModalOpen}
-        onDeleteCompanyModalClose={handleDeleteCompanyModalClose}
-        deletedCompanyTitle={deletedCompanyTitle}
-        onDeleteCompany={handleCompanyDelete}
-        isLoading={isLoading}
+      {pending ? (
+        <LoadingSpinner />
+      ) : (
+        <CompanyTable
+          rows={companies}
+          nameFilter={searchValue}
+          open={editCompanyDialogOpen}
+          onEditCompanyModalOpen={handleEditCompanyModalOpen}
+          onEditCompanyModalClose={handleEditCompanyModalClose}
+          editedCompanyTitle={editedCompanyTitle}
+          onEditedCompanyTitleChange={handleEditedCompanyTitleChange}
+          editedComments={editedComments}
+          onEditedCommentsChange={handleEditedCommentsChange}
+          checked={!rejected}
+          onStatusChange={handleStatusChange}
+          onSubmitEditedCompany={handleSubmitEditedCompany}
+          deleteModalOpen={deleteCompanyDialogOpen}
+          onDeleteCompanyModalOpen={handleDeleteCompanyModalOpen}
+          onDeleteCompanyModalClose={handleDeleteCompanyModalClose}
+          deletedCompanyTitle={deletedCompany.name}
+          onDeleteCompany={handleCompanyDelete}
+          isLoading={isLoading}
+        />
+      )}
+      <ErrorModal
+        open={!!errorMessage}
+        onClose={() => setErrorMessage("")}
+        clearModal={() => setErrorMessage("")}
+        errorMessage={errorMessage}
       />
     </ThemeProvider>
   );

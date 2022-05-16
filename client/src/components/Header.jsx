@@ -84,34 +84,3 @@ const Header = (props) => {
 };
 
 export default Header;
-
-/*
-<TextField
-              aria-label="add new company"
-              variant="filled"
-              type="text"
-              InputProps={{
-                sx: styles.inputProps,
-              }}
-              value={props.newCompanyName}
-              onChange={props.onNewCompanyNameChange}
-            />
-
-            <Button
-              type="button"
-              disabled={props.isLoading}
-              variant="contained"
-              sx={styles.button}
-              endIcon={
-                props.isLoading ? (
-                  <CircularProgress
-                    sx={{ color: theme.palette.action.disabled }}
-                    size={25}
-                  />
-                ) : undefined
-              }
-              onClick={props.onClick}
-            >
-              {props.isLoading ? "SUBMITTING" : "SUBMIT"}
-            </Button>
-*/

@@ -3,12 +3,10 @@ const express = require("express");
 const cors = require("cors");
 
 // Database module
-//require("./db/mongoose");
+require("./db/mongoose");
 
 // Custom modules
-//const userRoutes = require("./routes/user-routes");
-//const postRoutes = require("./routes/post-routes");
-//const cloudinaryRoutes = require("./routes/cloudinary-routes");
+const companyRoutes = require("./routes/company-routes");
 
 // Create the server app and designate the port
 const app = express();
@@ -20,17 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Register individual custom routers
-//app.use("/api/user", userRoutes); // This url triggers userRoutes
-//app.use("/api/post", postRoutes); // This url triggers postRoutes
-//app.use("/api/file", cloudinaryRoutes); // This url triggers signupRoutes
-
-// TEMPORARY ROUTE START
-app.use("/", (req, res, next) => {
-  res.send(
-    "<h1>This is a temporary placeholder until the server gains functionality</h1>"
-  );
-});
-// TEMPORARY ROUTE END
+app.use("/api/companies", companyRoutes); // This url triggers companyRoutes
 
 // Handling errors for unsupported routes
 app.use((req, res, next) => {
