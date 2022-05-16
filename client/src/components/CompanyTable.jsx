@@ -21,7 +21,7 @@ const columns = [
 ];
 
 const CompanyTable = (props) => {
-  if (!props.rows.length) {
+  if (!props.rows || !props.rows.length) {
     return (
       <Typography
         variant="h2"
@@ -48,7 +48,7 @@ const CompanyTable = (props) => {
           {props.rows.map(
             (row) =>
               row.name.toLowerCase().includes(props.nameFilter) && (
-                <StyledTableRow key={row.id}>
+                <StyledTableRow key={row._id}>
                   <StyledTableCell component="th" scope="row">
                     {row.name}
                   </StyledTableCell>
@@ -67,7 +67,7 @@ const CompanyTable = (props) => {
                       sx={{
                         marginRight: "2rem",
                       }}
-                      onClick={() => props.onEditCompanyModalOpen(row.id)}
+                      onClick={() => props.onEditCompanyModalOpen(row._id)}
                     >
                       Edit
                     </Button>
@@ -77,7 +77,7 @@ const CompanyTable = (props) => {
                         marginLeft: "2rem",
                         color: "#D12929",
                       }}
-                      onClick={() => props.onDeleteCompanyModalOpen(row.id)}
+                      onClick={() => props.onDeleteCompanyModalOpen(row._id)}
                     >
                       Delete
                     </Button>
