@@ -10,7 +10,7 @@ const companyRoutes = require("./routes/company-routes");
 
 // Create the server app and designate the port
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5555;
 
 // Register middleware
 app.use(cors());

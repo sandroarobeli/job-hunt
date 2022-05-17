@@ -30,7 +30,7 @@ const App = () => {
     const listCompanies = async () => {
       setPending(true);
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/companies", {
+        const response = await fetch("http://127.0.0.1:5555/api/companies", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -86,7 +86,7 @@ const App = () => {
   const handleSubmitNewCompany = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+      const response = await fetch("http://127.0.0.1:5555/api/companies", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -157,7 +157,7 @@ const App = () => {
   const handleSubmitEditedCompany = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+      const response = await fetch("http://127.0.0.1:5555/api/companies", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -213,7 +213,7 @@ const App = () => {
   const handleCompanyDelete = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/companies", {
+      const response = await fetch("http://127.0.0.1:5555/api/companies", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
