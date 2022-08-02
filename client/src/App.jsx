@@ -12,6 +12,7 @@ const App = () => {
   // Local State
   const [pending, setPending] = useState(false);
   const [companies, setCompanies] = useState([]);
+  const [totalRejects, setTotalRejects] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
@@ -265,6 +266,12 @@ const App = () => {
         onNewCommentsChange={handleNewCommentsChange}
         onSubmitNewCompany={handleSubmitNewCompany}
         totalCount={companies.length}
+        // Calculate the share of rejected applications
+        totalRejects={Math.round(
+          (companies.filter((company) => company.status === false).length /
+            companies.length) *
+            100
+        )}
         isLoading={isLoading}
       />
       {pending ? (

@@ -49,6 +49,10 @@ const Header = (props) => {
             Total Count: {props.totalCount}
           </Typography>
           <Typography variant="h5" component="h3">
+            Rejection: {props.totalRejects}
+            {"%"}
+          </Typography>
+          <Typography variant="h5" component="h3">
             SEARCH
           </Typography>
           <TextField
